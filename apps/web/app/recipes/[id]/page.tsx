@@ -33,7 +33,7 @@ export default async function RecipeDetailPage({ params }: PageProps) {
                     ✏️ Редактировать
                 </Link>
             </div>
-            <div className="bg-white rounded-3xl p-8 shadow-xl border-4 border-purple-100">
+            <div className="bg-white rounded-3xl p-4 md:p-8 shadow-xl border-4 border-purple-100">
                 <h1 className="text-4xl font-heading font-black text-slate-800 mb-6 text-center">{recipe.title}</h1>
                 <div className="mb-8 p-6 bg-purple-50 rounded-2xl border border-purple-100">
                     <h3 className="text-xl font-bold text-purple-700 mb-4 flex items-center">

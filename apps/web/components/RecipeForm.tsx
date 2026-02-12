@@ -72,7 +72,7 @@ export default function RecipeForm({ initialData, isEditMode = false }: RecipeFo
     };
     return (
         <div className="max-w-2xl mx-auto pb-20">
-            <h1 className="text-3xl font-heading font-black text-slate-800 mb-6 text-center">
+            <h1 className="text-2xl md:text-3xl font-heading font-black text-slate-800 mb-6 text-center">
                 {isEditMode ? 'Редактировать рецепт ✏️' : 'Создать рецепт 🍳'}
             </h1>
             {!isEditMode && (
@@ -98,7 +98,7 @@ export default function RecipeForm({ initialData, isEditMode = false }: RecipeFo
                 </div>
             )}
             {activeTab === 'scan' && !isEditMode ? (
-                <div className="bg-white p-6 rounded-3xl shadow-lg border border-purple-100">
+                <div className="bg-white p-4 md:p-6 rounded-3xl shadow-lg border border-purple-100">
                     <div className="text-center mb-6">
                         <div className="text-6xl mb-4">🤖</div>
                         <h2 className="text-xl font-bold text-slate-800 mb-2">Умный сканер рецептов</h2>
@@ -134,7 +134,7 @@ export default function RecipeForm({ initialData, isEditMode = false }: RecipeFo
                     </button>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="bg-white p-6 rounded-3xl shadow-lg border border-slate-100 space-y-6">
+                <form onSubmit={handleSubmit} className="bg-white p-4 md:p-6 rounded-3xl shadow-lg border border-slate-100 space-y-6">
                     <div>
                         <label className="block text-sm font-bold text-slate-700 mb-2">Название блюда</label>
                         <input

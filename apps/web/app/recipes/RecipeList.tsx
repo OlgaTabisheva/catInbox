@@ -45,7 +45,7 @@ export default function RecipeList({ initialRecipes, allProducts }: { initialRec
                     <Link
                         key={recipe.id}
                         href={`/recipes/${recipe.id}`}
-                        className="group bg-white p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md hover:border-purple-200 transition-all cursor-pointer relative flex justify-between items-start"
+                        className="group bg-white p-4 md:p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md hover:border-purple-200 transition-all cursor-pointer relative flex justify-between items-start"
                     >
                         <div>
                             <div className="flex items-center gap-2 mb-1">
