@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { createRecipe, updateRecipe, scanRecipeWithGemini } from '../app/actions';
 import { useRouter } from 'next/navigation';
+import { useTranslation } from '../app/TranslationProvider';
+
 interface RecipeFormProps {
     initialData?: {
         id?: number;
@@ -13,6 +15,7 @@ interface RecipeFormProps {
 }
 export default function RecipeForm({ initialData, isEditMode = false }: RecipeFormProps) {
     const router = useRouter();
+    const t = useTranslation();
     const [activeTab, setActiveTab] = useState<'manual' | 'scan'>('manual');
     const [title, setTitle] = useState(initialData?.title || '');
     const [ingredients, setIngredients] = useState<string[]>(initialData?.ingredients || ['']);
@@ -42,6 +45,7 @@ export default function RecipeForm({ initialData, isEditMode = false }: RecipeFo
                 router.push('/recipes');
             }
         } catch (e) {
+            console.error('Failed to submit recipe:', e);
         } finally {
             setIsSubmitting(false);
         }
@@ -64,7 +68,7 @@ export default function RecipeForm({ initialData, isEditMode = false }: RecipeFo
             } else {
                 setScanError(result.error || 'Не удалось распознать рецепт. Проверьте ссылку или текст.');
             }
-        } catch (e) {
+        } catch {
             setScanError('Ошибка соединения с AI.');
         } finally {
             setIsScanning(false);
@@ -73,15 +77,15 @@ export default function RecipeForm({ initialData, isEditMode = false }: RecipeFo
     return (
         <div className="max-w-2xl mx-auto pb-20">
             <h1 className="text-2xl md:text-3xl font-heading font-black text-slate-800 mb-6 text-center">
-                {isEditMode ? 'Редактировать рецепт ✏️' : 'Создать рецепт 🍳'}
+                {isEditMode ? `${t.edit} ✏️` : `${t.create} 🍳`}
             </h1>
             {!isEditMode && (
-                <div className="bg-white p-1 rounded-2xl shadow-sm mb-6 flex">
+                <div className="bg-sand20 p-1 rounded-2xl shadow-sm mb-6 flex border border-sand30">
                     <button
                         onClick={() => setActiveTab('manual')}
                         className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'manual'
-                            ? 'bg-blue-100 text-blue-700 shadow-sm'
-                            : 'text-slate-500 hover:bg-slate-50'
+                            ? 'bg-sand10 text-primary100 shadow-sm'
+                            : 'text-sand80 hover:bg-sand10/50'
                             }`}
                     >
                         Вручную
@@ -89,75 +93,75 @@ export default function RecipeForm({ initialData, isEditMode = false }: RecipeFo
                     <button
                         onClick={() => setActiveTab('scan')}
                         className={`flex-1 py-3 rounded-xl font-bold text-sm transition-all ${activeTab === 'scan'
-                            ? 'bg-purple-100 text-purple-700 shadow-sm'
-                            : 'text-slate-500 hover:bg-slate-50'
+                            ? 'bg-sand10 text-primary100 shadow-sm'
+                            : 'text-sand80 hover:bg-sand10/50'
                             }`}
                     >
-                        AI Сканер ✨
+                        {t.scanBot} ✨
                     </button>
                 </div>
             )}
             {activeTab === 'scan' && !isEditMode ? (
-                <div className="bg-white p-4 md:p-6 rounded-3xl shadow-lg border border-purple-100">
+                <div className="bg-sand20 p-4 md:p-6 rounded-3xl shadow-lg border border-sand30">
                     <div className="text-center mb-6">
-                        <div className="text-6xl mb-4">🤖</div>
-                        <h2 className="text-xl font-bold text-slate-800 mb-2">Умный сканер рецептов</h2>
-                        <p className="text-slate-500 text-sm">Вставьте ссылку на рецепт или просто скопируйте текст, и Gemini AI разложит всё по полочкам!</p>
+                        <img src="/assets/thinking.svg" alt="AI Scan" className="w-16 h-16 mx-auto mb-4 block" />
+                        <h2 className="text-xl font-bold text-sand80 mb-2">{t.scanBot}</h2>
+                        <p className="text-sand60 text-sm">{t.scanBotDesc}</p>
                     </div>
                     <textarea
-                        className="w-full p-4 rounded-xl bg-slate-50 border-2 border-dashed border-slate-300 focus:border-purple-400 focus:ring-0 transition-colors mb-4 text-sm"
+                        className="w-full p-4 rounded-xl bg-white border-2 border-dashed border-sand40 focus:border-primary100 focus:ring-0 transition-colors mb-4 text-sm font-medium"
                         rows={5}
                         placeholder="Вставьте ссылку (https://eda.ru/...) или текст рецепта здесь..."
                         value={scanUrl}
                         onChange={(e) => setScanUrl(e.target.value)}
                     />
                     {scanError && (
-                        <div className="p-3 bg-red-50 text-red-600 rounded-xl mb-4 text-sm font-bold text-center">
+                        <div className="p-3 bg-red-50 text-error rounded-xl mb-4 text-sm font-bold text-center">
                             {scanError}
                         </div>
                     )}
                     <button
                         onClick={handleScan}
                         disabled={isScanning || !scanUrl}
-                        className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                        className="w-full bg-primary100 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-primary140 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
                     >
                         {isScanning ? (
                             <>
                                 <span className="animate-spin">⚙️</span>
-                                Анализирую...
+                                {t.scanning}
                             </>
                         ) : (
                             <>
-                                ✨ Сканировать
+                                {t.scanBtn}
                             </>
                         )}
                     </button>
                 </div>
             ) : (
-                <form onSubmit={handleSubmit} className="bg-white p-4 md:p-6 rounded-3xl shadow-lg border border-slate-100 space-y-6">
+                <form onSubmit={handleSubmit} className="bg-sand20 p-4 md:p-6 rounded-3xl shadow-lg border border-sand30 space-y-6">
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">Название блюда</label>
+                        <label className="block text-sm font-bold text-sand80 mb-2 font-heading uppercase tracking-wide">Название блюда</label>
                         <input
                             required
                             minLength={2}
                             maxLength={100}
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
-                            className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all font-bold text-lg"
+                            className="w-full px-4 py-3 rounded-xl bg-sand10 border border-sand30 focus:border-primary100 focus:ring-4 focus:ring-primary100/10 transition-all font-bold text-lg"
                             placeholder="Например: Борщ"
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">Ингредиенты</label>
+                        <label className="block text-sm font-bold text-sand80 mb-2 font-heading uppercase tracking-wide">{t.ingredients}</label>
                         <div className="space-y-2">
                             {ingredients.map((ing, i) => (
                                 <div key={i} className="flex gap-2">
-                                    <span className="py-3 font-bold text-slate-300 w-6 text-center">{i + 1}.</span>
+                                    <span className="py-3 font-bold text-sand40 w-6 text-center">{i + 1}.</span>
                                     <input
                                         required
                                         value={ing}
                                         onChange={(e) => handleIngredientChange(i, e.target.value)}
-                                        className="flex-1 px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all font-medium"
+                                        className="flex-1 px-4 py-3 rounded-xl bg-sand10 border border-sand30 focus:border-primary100 focus:ring-2 focus:ring-primary100/10 transition-all font-medium"
                                         placeholder="Продукт..."
                                     />
                                 </div>
@@ -166,37 +170,37 @@ export default function RecipeForm({ initialData, isEditMode = false }: RecipeFo
                         <button
                             type="button"
                             onClick={handleAddIngredient}
-                            className="mt-3 text-sm font-bold text-blue-500 hover:text-blue-600 px-2 py-1 rounded-lg hover:bg-blue-50 transition-colors"
+                            className="mt-3 text-sm font-bold text-primary100 hover:brightness-90 px-2 py-1 rounded-lg hover:bg-white transition-colors"
                         >
                             + Добавить ингредиент
                         </button>
                     </div>
                     <div>
-                        <label className="block text-sm font-bold text-slate-700 mb-2">Как готовить</label>
+                        <label className="block text-sm font-bold text-sand80 mb-2 font-heading uppercase tracking-wide">{t.howToCook}</label>
                         <textarea
                             required
                             minLength={10}
                             value={steps}
                             onChange={(e) => setSteps(e.target.value)}
                             rows={6}
-                            className="w-full px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 transition-all resize-none"
+                            className="w-full px-4 py-3 rounded-xl bg-sand10 border border-sand30 focus:border-primary100 focus:ring-4 focus:ring-primary100/10 transition-all resize-none"
                             placeholder="1. Нарежьте...&#10;2. Смешайте...&#10;3. Запекайте..."
                         />
                     </div>
                     <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-[0.98] disabled:opacity-50 text-lg"
+                        className="w-full bg-primary100 hover:bg-primary140 text-white font-bold py-4 rounded-xl shadow-lg hover:shadow-xl transition-all active:scale-[0.98] disabled:opacity-50 text-lg uppercase tracking-wider"
                     >
-                        {isSubmitting ? 'Сохраняем...' : (isEditMode ? 'Сохранить изменения ✅' : 'Сохранить рецепт ✅')}
+                        {isSubmitting ? '...' : (isEditMode ? t.saveChanges : t.saveRecipe)}
                     </button>
                     {isEditMode && (
                         <button
                             type="button"
                             onClick={() => router.back()}
-                            className="w-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-xl transition-colors"
+                            className="w-full bg-sand10 hover:bg-sand20 text-sand80 font-bold py-4 rounded-xl border border-sand30 transition-colors"
                         >
-                            Отмена
+                            {t.cancel}
                         </button>
                     )}
                 </form>

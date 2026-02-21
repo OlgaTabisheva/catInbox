@@ -1,7 +1,8 @@
 'use client';
-import { useOptimistic, startTransition } from 'react';
+import { useOptimistic, startTransition, useState } from 'react';
 import Link from 'next/link';
 import { deleteRecipe } from '../actions';
+import { useTranslation } from '../TranslationProvider';
 
 interface Recipe {
     id: number;
@@ -12,10 +13,12 @@ interface Recipe {
 }
 
 export default function RecipeList({ initialRecipes, allProducts }: { initialRecipes: Recipe[], allProducts: any[] }) {
+    const t = useTranslation();
     const [recipes, setRecipes] = useOptimistic(
         initialRecipes,
         (state, newRecipes: Recipe[]) => newRecipes
     );
+    const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
     const checkAvailability = (ingredient: string) => {
         const lowerIng = ingredient.toLowerCase();
@@ -45,40 +48,60 @@ export default function RecipeList({ initialRecipes, allProducts }: { initialRec
                     <Link
                         key={recipe.id}
                         href={`/recipes/${recipe.id}`}
-                        className="group bg-white p-4 md:p-6 rounded-3xl shadow-sm border border-slate-100 hover:shadow-md hover:border-purple-200 transition-all cursor-pointer relative flex justify-between items-start"
+                        className="group bg-sand20 p-4 md:p-6 rounded-3xl shadow-sm border border-sand30 hover:shadow-md hover:border-primary100 transition-all cursor-pointer relative flex justify-between items-start"
                     >
                         <div>
                             <div className="flex items-center gap-2 mb-1">
-                                {isReady && <span className="text-xs font-black text-green-600 bg-green-100 px-2 py-0.5 rounded-full uppercase tracking-tighter">Можно готовить!</span>}
-                                <span className={`text-xs font-bold ${availableCount === totalCount ? 'text-green-500' : 'text-slate-400'}`}>
-                                    Ингредиенты: {availableCount}/{totalCount}
+                                {isReady && <span className="text-xs font-black text-primary100 bg-sandColorful20 px-2 py-0.5 rounded-full uppercase tracking-tighter">{t.ready}</span>}
+                                <span className={`text-xs font-bold ${availableCount === totalCount ? 'text-primary100' : 'text-sand80'}`}>
+                                    {t.ingredients}: {availableCount}/{totalCount}
                                 </span>
                             </div>
-                            <h3 className="font-heading font-bold text-xl text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">{recipe.title}</h3>
+                            <h3 className="font-heading font-bold text-xl text-sand80 mb-2 group-hover:text-primary100 transition-colors">{recipe.title}</h3>
                             <div className="flex flex-wrap gap-2 mb-4">
                                 {ings.slice(0, 3).map((ing, i) => (
-                                    <span key={i} className={`text-xs font-bold px-2 py-1 rounded-lg ${checkAvailability(ing) ? 'bg-green-50 text-green-700 border border-green-100' : 'bg-slate-100 text-slate-500'}`}>
+                                    <span key={i} className={`text-xs font-bold px-2 py-1 rounded-lg ${checkAvailability(ing) ? 'bg-sand10 text-primary100 border border-sand30' : 'bg-sandColorful10 text-sand80 opacity-60'}`}>
                                         {ing}
                                     </span>
                                 ))}
                                 {ings.length > 3 && (
-                                    <span className="text-xs font-bold px-2 py-1 bg-slate-50 text-slate-400 rounded-lg">
+                                    <span className="text-xs font-bold px-2 py-1 bg-sand10 text-sand80 rounded-lg">
                                         +{ings.length - 3}
                                     </span>
                                 )}
                             </div>
                         </div>
                         <div className="flex gap-2">
-                            <button
-                                onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    if (confirm('Удалить рецепт?')) handleDelete(recipe.id);
-                                }}
-                                className="w-8 h-8 flex items-center justify-center rounded-full bg-red-50 text-red-400 hover:bg-red-500 hover:text-white transition-colors relative z-20"
-                            >
-                                ✕
-                            </button>
+                            {confirmDeleteId === recipe.id ? (
+                                <div className="absolute inset-0 bg-sand20/95 z-50 rounded-3xl flex flex-col items-center justify-center p-4 text-center animate-in fade-in zoom-in duration-200">
+                                    <p className="font-bold text-slate-800 mb-2 text-sm">{t.deleteConfirm} «{recipe.title}»?</p>
+                                    <div className="flex gap-2 w-full justify-center">
+                                        <button
+                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDeleteId(null); }}
+                                            className="px-4 py-1.5 rounded-lg bg-slate-200 font-bold text-slate-600 hover:bg-slate-300 text-xs"
+                                        >
+                                            {t.no}
+                                        </button>
+                                        <button
+                                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); handleDelete(recipe.id); }}
+                                            className="px-4 py-1.5 rounded-lg bg-primary100 font-bold text-white hover:bg-primary140 text-xs"
+                                        >
+                                            {t.yes}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setConfirmDeleteId(recipe.id);
+                                    }}
+                                    className="w-8 h-8 flex items-center justify-center rounded-full bg-sand10 border border-sand30 text-primary100 hover:bg-primary100 hover:text-white transition-colors relative z-20"
+                                >
+                                    ✕
+                                </button>
+                            )}
                         </div>
                     </Link>
                 );

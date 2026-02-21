@@ -10,12 +10,29 @@ export default async function RecipeDetailPage({ params }: PageProps) {
         getRecipeById(parseInt(id)),
         getAllProducts()
     ]);
+    const { getDictionary, getCurrentLang, translateText } = await import('../../../lib/i18n');
+    const t = await getDictionary();
+    const lang = await getCurrentLang();
     if (!recipe) {
         notFound();
     }
+
+    if (lang === 'en') {
+        recipe.title = await translateText(recipe.title, lang);
+        recipe.ingredients = await Promise.all((recipe.ingredients as string[]).map(ing => translateText(ing, lang)));
+        recipe.steps = await translateText(recipe.steps, lang);
+    }
+
+    const translatedProducts = await Promise.all(allProducts.map(async p => {
+        if (lang === 'en') {
+            return { ...p, originalName: p.name, name: await translateText(p.name, lang) };
+        }
+        return p;
+    }));
+
     const checkAvailability = (ingredient: string) => {
         const lowerIng = ingredient.toLowerCase();
-        return allProducts.some(p =>
+        return translatedProducts.some(p =>
             p.inStock &&
             (lowerIng.includes(p.name.toLowerCase()) || p.name.toLowerCase().includes(lowerIng))
         );
@@ -23,21 +40,21 @@ export default async function RecipeDetailPage({ params }: PageProps) {
     return (
         <div className="max-w-2xl mx-auto space-y-8 pb-12">
             <div className="flex justify-between items-center">
-                <Link href="/recipes" className="inline-flex items-center text-slate-500 hover:text-purple-600 font-bold transition-colors">
-                    ← Назад к рецептам
+                <Link href="/recipes" className="inline-flex items-center text-sand80 hover:text-primary100 font-bold transition-colors">
+                    ← {t.backToRecipes}
                 </Link>
                 <Link
                     href={`/recipes/${recipe.id}/edit`}
-                    className="inline-flex items-center bg-blue-100 text-blue-600 px-4 py-2 rounded-xl font-bold hover:bg-blue-200 transition-colors"
+                    className="inline-flex items-center bg-sand10 text-primary100 px-4 py-2 rounded-xl font-bold hover:bg-sand20 border border-sand30 transition-colors shadow-sm"
                 >
-                    ✏️ Редактировать
+                    ✏️ {t.edit}
                 </Link>
             </div>
-            <div className="bg-white rounded-3xl p-4 md:p-8 shadow-xl border-4 border-purple-100">
-                <h1 className="text-4xl font-heading font-black text-slate-800 mb-6 text-center">{recipe.title}</h1>
-                <div className="mb-8 p-6 bg-purple-50 rounded-2xl border border-purple-100">
-                    <h3 className="text-xl font-bold text-purple-700 mb-4 flex items-center">
-                        🛒 Ингредиенты
+            <div className="bg-sand20 rounded-3xl p-4 md:p-8 shadow-xl border-4 border-sand30">
+                <h1 className="text-4xl font-heading font-black text-sand80 mb-6 text-center">{recipe.title}</h1>
+                <div className="mb-8 p-6 bg-sandColorful10 rounded-2xl border border-sand30">
+                    <h3 className="text-xl font-bold text-primary100 mb-4 flex items-center gap-2">
+                        🛒 {t.ingredients}
                     </h3>
                     <ul className="space-y-3">
                         {(recipe.ingredients as string[]).map((ing, idx) => {
@@ -59,10 +76,10 @@ export default async function RecipeDetailPage({ params }: PageProps) {
                     </ul>
                 </div>
                 <div>
-                    <h3 className="text-xl font-bold text-slate-700 mb-4 flex items-center">
-                        👨‍🍳 Приготовление
+                    <h3 className="text-xl font-bold text-sand80 mb-4 flex items-center gap-2">
+                        👨‍🍳 {t.howToCook}
                     </h3>
-                    <div className="prose prose-purple max-w-none text-slate-600 leading-relaxed whitespace-pre-line font-medium bg-slate-50 p-6 rounded-2xl">
+                    <div className="prose prose-stone max-w-none text-sand80 leading-relaxed whitespace-pre-line font-medium bg-sandColorful10/50 p-6 rounded-2xl border border-sand30">
                         {recipe.steps}
                     </div>
                 </div>

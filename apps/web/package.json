@@ -13,6 +13,8 @@
     "@repo/db": "^0.0.0",
     "@repo/ui": "^0.0.0",
     "bcryptjs": "^3.0.3",
+    "lottie-react": "^2.4.1",
+    "lottie-web": "^5.13.0",
     "next": "16.1.6",
     "next-auth": "^5.0.0-beta.30",
     "react": "19.2.3",

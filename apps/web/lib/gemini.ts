@@ -1,9 +1,11 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 const genAI = new GoogleGenerativeAI(process.env.GOOGLE_GENERATIVE_AI_API_KEY || 'MISSING_KEY');
 const BASE_URL = 'https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/';
+
 export async function findBestImageForProduct(productName: string): Promise<string> {
     const defaultImage = `${BASE_URL}1f9fa.png`;
     const lowerName = productName.toLowerCase();
+
     const emojiMap: Record<string, string> = {
         'молоко': '1f95b',
         'хлеб': '1f35e',
@@ -40,11 +42,13 @@ export async function findBestImageForProduct(productName: string): Promise<stri
         'малина': '1f347',
         'грибы': '1f344',
     };
+
     for (const key in emojiMap) {
         if (lowerName.includes(key)) {
             return `${BASE_URL}${emojiMap[key]}.png`;
         }
     }
+
     if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
         try {
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -60,7 +64,9 @@ export async function findBestImageForProduct(productName: string): Promise<stri
                 return `${BASE_URL}${text}.png`;
             }
         } catch (e) {
+            console.error("Gemini twemoji search failed", e);
         }
     }
+
     return defaultImage;
 }
